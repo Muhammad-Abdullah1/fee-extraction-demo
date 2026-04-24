@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>{% block title %}Fee Extraction Demo{% endblock %}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <h1><a href="/">Fee Extraction Demo</a></h1>
+    <nav>
+      <a href="/">Fees</a>
+      <a href="/sources">Sources</a>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <p>Proof of concept. Every value links back to its official source. AI is used only for structuring messy text — it never decides amounts.</p>
+  </footer>
+</body>
+</html>

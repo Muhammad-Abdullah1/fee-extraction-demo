@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ fee.fee_name }} — Fee Detail{% endblock %}
+{% block content %}
+
+<p><a href="/">← back to fees</a></p>
+
+<h2>{{ fee.fee_name }}</h2>
+
+<table class="kv">
+  <tr><th>Amount</th><td class="amt">{{ fee.amount_text or "—" }}{% if fee.amount is not none %} <span class="parsed">(parsed: {{ fee.amount }})</span>{% endif %}</td></tr>
+  <tr><th>Unit</th><td>{{ fee.unit or "—" }}</td></tr>
+  <tr><th>Department</th><td>{{ fee.department or "—" }}</td></tr>
+  <tr><th>Jurisdiction</th><td>{{ fee.jurisdiction }}</td></tr>
+  <tr><th>Category</th><td>{{ fee.category or "—" }}</td></tr>
+  <tr><th>Status</th><td><span class="flag flag-{{ fee.validation_flag }}">{{ fee.validation_flag }}</span> &nbsp; confidence {{ "%.2f"|format(fee.confidence) }}</td></tr>
+  <tr><th>Extracted at</th><td>{{ fee.extracted_at.strftime('%Y-%m-%d %H:%M:%SZ') }}</td></tr>
+  <tr><th>Notes</th><td>{{ fee.notes or "—" }}</td></tr>
+</table>
+
+<h3>Raw source evidence</h3>
+<p class="hint">This is the literal line or table cell from which the amount above was read. No transformation, no inference.</p>
+<pre class="snippet big">{{ fee.raw_snippet }}</pre>
+
+<h3>Source document</h3>
+<table class="kv">
+  <tr><th>Title</th><td>{{ source.title }}</td></tr>
+  <tr><th>Public URL</th><td><a href="{{ source.url }}" target="_blank" rel="noopener">{{ source.url }}</a></td></tr>
+  <tr><th>Type</th><td>{{ source.source_type }}</td></tr>
+  <tr><th>Fetched at</th><td>{{ source.fetched_at.strftime('%Y-%m-%d %H:%M:%SZ') }}</td></tr>
+  <tr><th>Local cache</th><td>{{ source.local_path or "—" }}</td></tr>
+  <tr><th>Notes</th><td>{{ source.notes or "—" }}</td></tr>
+</table>
+
+<p><a href="/sources/{{ source.id }}">view full source extracted text →</a></p>
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="summary">
+  <div class="card">
+    <div class="num">{{ summary.total }}</div>
+    <div class="lbl">Total fees</div>
+  </div>
+  <div class="card ok">
+    <div class="num">{{ summary.verified }}</div>
+    <div class="lbl">Verified</div>
+  </div>
+  <div class="card warn">
+    <div class="num">{{ summary.needs_review }}</div>
+    <div class="lbl">Needs review</div>
+  </div>
+  <div class="card bad">
+    <div class="num">{{ summary.conflicting }}</div>
+    <div class="lbl">Conflicting</div>
+  </div>
+  <div class="card">
+    <div class="num">{{ summary.sources }}</div>
+    <div class="lbl">Sources</div>
+  </div>
+</section>
+
+<form method="get" class="filters">
+  <input type="text" name="q" placeholder="Search fee name or raw snippet" value="{{ filters.q }}">
+  <select name="category">
+    <option value="">All categories</option>
+    {% for c in categories %}
+      <option value="{{ c }}" {% if filters.category == c %}selected{% endif %}>{{ c }}</option>
+    {% endfor %}
+  </select>
+  <select name="jurisdiction">
+    <option value="">All jurisdictions</option>
+    {% for j in jurisdictions %}
+      <option value="{{ j }}" {% if filters.jurisdiction == j %}selected{% endif %}>{{ j }}</option>
+    {% endfor %}
+  </select>
+  <select name="flag">
+    <option value="">All statuses</option>
+    {% for f in ["verified","needs_review","conflicting","incomplete"] %}
+      <option value="{{ f }}" {% if filters.flag == f %}selected{% endif %}>{{ f }}</option>
+    {% endfor %}
+  </select>
+  <input type="number" name="limit" value="{{ filters.limit }}" min="10" max="2000" step="50">
+  <button type="submit">Apply</button>
+  <a class="reset" href="/">reset</a>
+</form>
+
+<p class="meta">Showing {{ fees|length }} of {{ total_matching }} matching records.</p>
+
+<table class="fees">
+  <thead>
+    <tr>
+      <th>Fee</th>
+      <th>Amount</th>
+      <th>Unit</th>
+      <th>Department</th>
+      <th>Jurisdiction</th>
+      <th>Category</th>
+      <th>Status</th>
+      <th>Source</th>
+      <th>Raw evidence</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for fee in fees %}
+      {% set src = sources[fee.source_id] %}
+      <tr class="row-{{ fee.validation_flag }}">
+        <td><a href="/fees/{{ fee.id }}">{{ fee.fee_name }}</a></td>
+        <td class="amt">{{ fee.amount_text or "—" }}</td>
+        <td>{{ fee.unit or "" }}</td>
+        <td>{{ fee.department or "" }}</td>
+        <td>{{ fee.jurisdiction }}</td>
+        <td>{{ fee.category or "" }}</td>
+        <td>
+          <span class="flag flag-{{ fee.validation_flag }}">{{ fee.validation_flag }}</span>
+          <span class="conf">conf {{ "%.2f"|format(fee.confidence) }}</span>
+        </td>
+        <td>
+          {% if src %}
+            <a href="{{ src.url }}" target="_blank" rel="noopener">{{ src.title[:60] }}{% if src.title|length > 60 %}…{% endif %}</a>
+          {% endif %}
+        </td>
+        <td>
+          <details>
+            <summary>show</summary>
+            <pre class="snippet">{{ fee.raw_snippet }}</pre>
+            {% if fee.notes %}<p class="note">{{ fee.notes }}</p>{% endif %}
+            <p class="ts">extracted {{ fee.extracted_at.strftime('%Y-%m-%d %H:%M:%SZ') }}</p>
+          </details>
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% if fees|length == 0 %}
+  <p class="empty">No fees match those filters.</p>
+{% endif %}
+
+{% endblock %}

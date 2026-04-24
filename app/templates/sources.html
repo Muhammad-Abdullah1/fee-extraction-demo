@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Sources{% endblock %}
+{% block content %}
+
+<h2>Ingested sources</h2>
+<p class="meta">Each fee in the database links back to one of these documents.</p>
+
+<table class="fees">
+  <thead>
+    <tr>
+      <th>Title</th>
+      <th>Jurisdiction</th>
+      <th>Department</th>
+      <th>Type</th>
+      <th>Fetched</th>
+      <th>Fees</th>
+      <th>URL</th>
+      <th>Notes</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for src, count in rows %}
+      <tr>
+        <td><a href="/sources/{{ src.id }}">{{ src.title }}</a></td>
+        <td>{{ src.jurisdiction }}</td>
+        <td>{{ src.department or "" }}</td>
+        <td>{{ src.source_type }}</td>
+        <td>{{ src.fetched_at.strftime('%Y-%m-%d %H:%MZ') }}</td>
+        <td>{{ count }}</td>
+        <td><a href="{{ src.url }}" target="_blank" rel="noopener">open</a></td>
+        <td class="note">{{ src.notes or "" }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

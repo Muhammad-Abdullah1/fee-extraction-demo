@@ -1,0 +1,174 @@
+/* Minimal, clean styling for the demo. No frameworks. */
+* { box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  background: #f7f7f8;
+  color: #222;
+  line-height: 1.45;
+}
+header {
+  background: #1f2933;
+  color: #fff;
+  padding: 0.8rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid #3e4c59;
+}
+header h1 { font-size: 1.05rem; margin: 0; font-weight: 600; }
+header h1 a { color: #fff; text-decoration: none; }
+header nav a {
+  color: #cbd2d9;
+  margin-left: 1.2rem;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+header nav a:hover { color: #fff; }
+
+main { max-width: 1400px; margin: 1.2rem auto; padding: 0 1.5rem; }
+
+footer {
+  border-top: 1px solid #ddd;
+  padding: 1rem 1.5rem;
+  font-size: 0.8rem;
+  color: #555;
+  background: #eee;
+  margin-top: 3rem;
+}
+
+h2 { margin-top: 0.4rem; }
+h3 { margin-top: 1.6rem; }
+
+.summary {
+  display: flex;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
+  flex-wrap: wrap;
+}
+.card {
+  background: #fff;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  min-width: 110px;
+}
+.card .num { font-size: 1.5rem; font-weight: 600; }
+.card .lbl { font-size: 0.78rem; color: #666; text-transform: uppercase; letter-spacing: 0.04em; }
+.card.ok { border-left: 4px solid #17a673; }
+.card.warn { border-left: 4px solid #f4a261; }
+.card.bad { border-left: 4px solid #c44536; }
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  background: #fff;
+  padding: 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+.filters input, .filters select, .filters button {
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  font-size: 0.85rem;
+}
+.filters input[type=text] { flex: 1 1 240px; }
+.filters button {
+  background: #1f2933;
+  color: #fff;
+  border-color: #1f2933;
+  cursor: pointer;
+}
+.filters .reset {
+  align-self: center;
+  font-size: 0.8rem;
+  color: #666;
+  margin-left: 0.4rem;
+}
+
+.meta { font-size: 0.85rem; color: #666; }
+.empty { padding: 2rem; text-align: center; color: #666; }
+
+table.fees {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  font-size: 0.85rem;
+  border: 1px solid #ddd;
+}
+table.fees th, table.fees td {
+  text-align: left;
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid #eee;
+  vertical-align: top;
+}
+table.fees th {
+  background: #f0f3f6;
+  font-weight: 600;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #444;
+}
+table.fees td.amt { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; }
+table.fees tr.row-conflicting { background: #fff6f4; }
+table.fees tr.row-needs_review { background: #fffaf2; }
+
+table.kv {
+  border-collapse: collapse;
+  background: #fff;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+table.kv th {
+  text-align: left;
+  background: #f0f3f6;
+  padding: 0.4rem 0.7rem;
+  width: 180px;
+  border-bottom: 1px solid #eee;
+}
+table.kv td { padding: 0.4rem 0.7rem; border-bottom: 1px solid #eee; }
+
+.flag {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+  font-weight: 600;
+  display: inline-block;
+}
+.flag-verified     { background: #d6f1e3; color: #11603f; }
+.flag-needs_review { background: #fde7c2; color: #885810; }
+.flag-conflicting  { background: #f9d3cd; color: #8a2818; }
+.flag-incomplete   { background: #dde3ea; color: #3e4c59; }
+
+.conf { font-size: 0.72rem; color: #777; margin-left: 0.3rem; }
+
+.snippet {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.78rem;
+  background: #f6f8fa;
+  border: 1px solid #e3e6e8;
+  border-radius: 3px;
+  padding: 0.5rem;
+  margin: 0.2rem 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.snippet.big { font-size: 0.85rem; padding: 0.8rem; }
+
+.note { font-size: 0.78rem; color: #8a2818; margin: 0.2rem 0; }
+.ts   { font-size: 0.72rem; color: #888; margin: 0.2rem 0 0; }
+.parsed { color: #777; font-size: 0.85em; }
+.hint { color: #666; font-size: 0.85rem; }
+
+details summary { cursor: pointer; font-size: 0.78rem; color: #335d92; }
+details summary:hover { text-decoration: underline; }
+
+a { color: #335d92; }
+a:hover { text-decoration: underline; }

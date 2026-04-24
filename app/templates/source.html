@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ source.title }} — Source{% endblock %}
+{% block content %}
+
+<p><a href="/sources">← back to sources</a></p>
+
+<h2>{{ source.title }}</h2>
+<table class="kv">
+  <tr><th>URL</th><td><a href="{{ source.url }}" target="_blank" rel="noopener">{{ source.url }}</a></td></tr>
+  <tr><th>Jurisdiction</th><td>{{ source.jurisdiction }}</td></tr>
+  <tr><th>Department</th><td>{{ source.department or "—" }}</td></tr>
+  <tr><th>Type</th><td>{{ source.source_type }}</td></tr>
+  <tr><th>Fetched at</th><td>{{ source.fetched_at.strftime('%Y-%m-%d %H:%M:%SZ') }}</td></tr>
+  <tr><th>Local cache</th><td>{{ source.local_path or "—" }}</td></tr>
+  <tr><th>Fees extracted</th><td>{{ fees|length }}</td></tr>
+  <tr><th>Notes</th><td>{{ source.notes or "—" }}</td></tr>
+</table>
+
+{% if source.raw_content %}
+  <h3>Raw extracted text (first 6,000 chars)</h3>
+  <pre class="snippet big">{{ source.raw_content[:6000] }}</pre>
+{% endif %}
+
+<h3>Fees extracted from this source</h3>
+<table class="fees">
+  <thead><tr><th>Fee</th><th>Amount</th><th>Unit</th><th>Status</th></tr></thead>
+  <tbody>
+    {% for f in fees %}
+      <tr class="row-{{ f.validation_flag }}">
+        <td><a href="/fees/{{ f.id }}">{{ f.fee_name }}</a></td>
+        <td class="amt">{{ f.amount_text or "—" }}</td>
+        <td>{{ f.unit or "" }}</td>
+        <td><span class="flag flag-{{ f.validation_flag }}">{{ f.validation_flag }}</span></td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
