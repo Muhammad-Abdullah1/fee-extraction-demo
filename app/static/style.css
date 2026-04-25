@@ -172,3 +172,183 @@ details summary:hover { text-decoration: underline; }
 
 a { color: #335d92; }
 a:hover { text-decoration: underline; }
+
+/* ── Estimate builder ────────────────────────────────────── */
+.estimate-form {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.4rem;
+}
+.form-row {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.7rem;
+}
+.form-row:last-child { margin-bottom: 0; }
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1 1 200px;
+}
+.form-group label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #444;
+}
+.form-group input[type=text],
+.form-group input[type=number],
+.form-group select {
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #bbb;
+  border-radius: 3px;
+  font-size: 0.9rem;
+  background: #fff;
+}
+.btn-primary {
+  background: #1f2933;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.btn-primary:hover { background: #2d3f50; }
+.btn-primary:disabled { opacity: 0.6; cursor: default; }
+.btn-secondary {
+  background: #fff;
+  color: #1f2933;
+  border: 1px solid #bbb;
+  padding: 0.35rem 0.9rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.btn-secondary:hover { background: #f0f3f6; }
+.btn-contact {
+  background: #eef3ff;
+  color: #335d92;
+  border: 1px solid #b0c4de;
+  padding: 0.18rem 0.55rem;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.76rem;
+  font-weight: 500;
+}
+.btn-contact:hover { background: #d6e8ff; }
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.7rem;
+}
+.cart-header h3 { margin: 0 0 0.15rem; }
+.cart-actions { display: flex; gap: 0.5rem; flex-shrink: 0; }
+
+.item-source-label {
+  font-size: 0.75rem;
+  color: #777;
+  margin-top: 0.1rem;
+}
+
+.amt-input {
+  width: 120px;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 0.22rem 0.4rem;
+  font-size: 0.88rem;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+.amt-input:focus { border-color: #335d92; outline: none; }
+
+.notes-input {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  padding: 0.18rem 0.3rem;
+  font-size: 0.82rem;
+  background: transparent;
+  color: #555;
+}
+.notes-input:focus {
+  border-color: #bbb;
+  background: #fff;
+  outline: none;
+  color: #222;
+}
+
+.cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1f2933;
+  color: #fff;
+  padding: 0.85rem 1.1rem;
+  border-top: none;
+}
+.total-label { font-weight: 600; font-size: 1rem; }
+.total-note { font-size: 0.76rem; color: #aab; margin-left: 0.5rem; }
+.total-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+.disclaimer {
+  background: #fffaf2;
+  border: 1px solid #f4a261;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  padding: 0.6rem 1rem;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+/* Row tints by status */
+.row-tbd         { background: #fafafa; }
+.row-calculated  { background: #f5faff; }
+.row-approximate { background: #fffcf5; }
+.row-verified    { background: #f7fdf7; }
+.row-needs_review { background: #fffaf2; }
+
+/* Additional status badge colors for estimate */
+.flag-calc   { background: #d6eaff; color: #1a4e87; }
+.flag-approx { background: #fde7c2; color: #885810; }
+.flag-tbd    { background: #ebebeb; color: #555; }
+.flag-exempt { background: #eee;    color: #888; }
+
+/* Modal */
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+.modal-box {
+  background: #fff;
+  border-radius: 6px;
+  padding: 1.6rem;
+  max-width: 500px;
+  width: 92%;
+  box-shadow: 0 6px 28px rgba(0,0,0,0.22);
+}
+
+@media print {
+  header, .estimate-form, .cart-actions, .btn-contact, .notes-input, .amt-input { display: none !important; }
+  .cart-total { color: #000; background: #eee; }
+  body { background: #fff; }
+  main { padding: 0; margin: 0; max-width: 100%; }
+}

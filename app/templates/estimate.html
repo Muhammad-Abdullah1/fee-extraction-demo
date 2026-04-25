@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% block title %}Estimate Builder{% endblock %}
+{% block content %}
+
+<h2>Estimate Builder</h2>
+<p class="meta">Enter project details to auto-load verified fee line items. Check/uncheck fees, edit amounts, add notes, then export to CSV.</p>
+
+<div class="estimate-form">
+  <div class="form-row">
+    <div class="form-group" style="flex:2 1 260px">
+      <label>Customer Name</label>
+      <input type="text" id="customer-name" placeholder="e.g. Rebecca Pham">
+    </div>
+    <div class="form-group" style="flex:3 1 340px">
+      <label>Property Address / APN</label>
+      <input type="text" id="address" placeholder="e.g. TBD W. Avenue L, Calimesa CA — APN 410-092-012">
+    </div>
+    <div class="form-group" style="flex:2 1 200px">
+      <label>Project Type</label>
+      <select id="project-type">
+        <option value="new_mh">New Manufactured Home</option>
+        <option value="replacement_mh">Replacement Manufactured Home</option>
+        <option value="adu">ADU / Accessory Dwelling</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group" style="flex:2 1 220px">
+      <label>Jurisdiction</label>
+      <select id="jurisdiction" onchange="toggleAreaPlan()">
+        <option value="calimesa">City of Calimesa</option>
+        <option value="riverside_county">Riverside County (Unincorporated)</option>
+      </select>
+    </div>
+    <div class="form-group" id="area-plan-group" style="flex:3 1 300px;display:none">
+      <label>Area Plan <span style="font-weight:400;color:#888">(Rivco DIF 659.14)</span></label>
+      <select id="area-plan">
+        {% for ap in area_plans %}
+        <option value="{{ ap }}">{{ ap }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="flex:1 1 140px">
+      <label>Home Size (sq ft)</label>
+      <input type="number" id="sqft" value="1248" min="100" max="20000" step="1">
+    </div>
+    <div class="form-group" style="flex:0 0 auto;align-self:flex-end">
+      <button onclick="buildEstimate()" class="btn-primary" id="build-btn">&#9656; Build Estimate</button>
+    </div>
+  </div>
+</div>
+
+<div id="cart-section" style="display:none">
+
+  <div class="cart-header">
+    <div>
+      <h3 id="cart-title" style="margin-bottom:0.15rem">Fee Estimate</h3>
+      <div id="cart-meta" class="meta"></div>
+    </div>
+    <div class="cart-actions">
+      <button onclick="exportCSV()" class="btn-secondary">&#8595; Export CSV</button>
+      <button onclick="window.print()" class="btn-secondary">&#9113; Print</button>
+    </div>
+  </div>
+
+  <table class="fees" id="cart-table">
+    <thead>
+      <tr>
+        <th style="width:36px;text-align:center">
+          <input type="checkbox" id="check-all" title="Check/uncheck all" onchange="toggleAll(this)">
+        </th>
+        <th>Fee Item</th>
+        <th style="width:150px">Amount</th>
+        <th style="width:110px">Status</th>
+        <th style="width:80px;text-align:center">Source</th>
+        <th>Notes</th>
+        <th style="width:76px;text-align:center">Outreach</th>
+      </tr>
+    </thead>
+    <tbody id="cart-body"></tbody>
+  </table>
+
+  <div class="cart-total">
+    <div>
+      <span class="total-label">Estimate Total</span>
+      <span class="total-note">(checked items with amounts entered)</span>
+    </div>
+    <div class="total-amount" id="total-display">$0.00</div>
+  </div>
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> Fees gathered as a courtesy. To be paid directly to each individual agency. Accuracy not guaranteed — fees subject to change. Items marked <em>TBD</em> or <em>Pending</em> require direct confirmation. Click <strong>Outreach</strong> for department contact info.
+  </div>
+
+</div>
+
+<!-- Outreach modal -->
+<div id="outreach-modal" class="modal" style="display:none" onclick="closeModal(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <h4 id="modal-title" style="margin-top:0"></h4>
+    <div id="modal-body"></div>
+    <button class="btn-primary" onclick="closeModal()" style="margin-top:1rem">Close</button>
+  </div>
+</div>
+
+<script>
+let cartItems = [];
+
+function toggleAreaPlan() {
+  const jx = document.getElementById('jurisdiction').value;
+  document.getElementById('area-plan-group').style.display = jx === 'riverside_county' ? '' : 'none';
+}
+
+async function buildEstimate() {
+  const btn = document.getElementById('build-btn');
+  btn.disabled = true;
+  btn.textContent = 'Loading…';
+
+  const jurisdiction = document.getElementById('jurisdiction').value;
+  const sqft = document.getElementById('sqft').value;
+  const projectType = document.getElementById('project-type').value;
+  const apEl = document.getElementById('area-plan');
+  const areaPlan = apEl ? apEl.value : '';
+
+  let url = `/api/estimate-fees?jurisdiction=${encodeURIComponent(jurisdiction)}&sqft=${sqft}&project_type=${encodeURIComponent(projectType)}`;
+  if (areaPlan) url += `&area_plan=${encodeURIComponent(areaPlan)}`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    cartItems = data.items;
+    renderCart(data);
+    document.getElementById('cart-section').style.display = '';
+    document.getElementById('cart-section').scrollIntoView({behavior: 'smooth', block: 'start'});
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '&#9656; Build Estimate';
+  }
+}
+
+function renderCart(data) {
+  const customer = document.getElementById('customer-name').value.trim() || 'Customer';
+  const address = document.getElementById('address').value.trim();
+  const ptEl = document.getElementById('project-type');
+  const projectType = ptEl.options[ptEl.selectedIndex].text;
+  const jxEl = document.getElementById('jurisdiction');
+  const jxLabel = jxEl.options[jxEl.selectedIndex].text;
+
+  document.getElementById('cart-title').textContent = `Fee Estimate — ${customer}`;
+  document.getElementById('cart-meta').innerHTML =
+    `${escHtml(address || 'Address TBD')} &nbsp;|&nbsp; ${escHtml(projectType)}, ${parseFloat(data.sqft).toLocaleString()} sq ft &nbsp;|&nbsp; ${escHtml(jxLabel)}`;
+
+  const tbody = document.getElementById('cart-body');
+  tbody.innerHTML = '';
+
+  cartItems.forEach((item, i) => {
+    const row = document.createElement('tr');
+    row.className = `row-${item.status}`;
+    row.dataset.idx = i;
+
+    const amtVal = item.amount !== null ? parseFloat(item.amount).toFixed(2) : '';
+    const amtPlaceholder = item.amount === null ? item.amount_text : '';
+
+    const sourceCell = item.fee_id
+      ? `<a href="/fees/${item.fee_id}" target="_blank" title="View raw source evidence">Evidence</a>`
+      : item.source_url
+        ? `<a href="${escHtml(item.source_url)}" target="_blank" rel="noopener" title="${escHtml(item.source_label)}">Source ↗</a>`
+        : '—';
+
+    const outreachCell = item.outreach
+      ? `<button class="btn-contact" data-idx="${i}">Contact</button>`
+      : '—';
+
+    row.innerHTML = `
+      <td style="text-align:center">
+        <input type="checkbox" ${item.included ? 'checked' : ''} onchange="updateTotal()">
+      </td>
+      <td>
+        <strong>${escHtml(item.fee_name)}</strong>
+        <div class="item-source-label">${escHtml(item.source_label)}</div>
+      </td>
+      <td>
+        <input type="number" class="amt-input" value="${escHtml(amtVal)}"
+               placeholder="${escHtml(amtPlaceholder)}"
+               step="0.01" min="0" onchange="updateTotal()">
+      </td>
+      <td>${statusBadge(item.status)}</td>
+      <td style="text-align:center">${sourceCell}</td>
+      <td>
+        <input type="text" class="notes-input" value="${escHtml(item.notes)}" placeholder="Add notes…">
+      </td>
+      <td style="text-align:center">${outreachCell}</td>
+    `;
+    tbody.appendChild(row);
+  });
+
+  tbody.addEventListener('click', e => {
+    const btn = e.target.closest('.btn-contact');
+    if (btn) showContact(parseInt(btn.dataset.idx));
+  });
+
+  updateTotal();
+}
+
+function statusBadge(status) {
+  const map = {
+    verified:     ['flag-verified',     'Verified'],
+    needs_review: ['flag-needs_review', 'OCR / Review'],
+    calculated:   ['flag-calc',         'Calculated'],
+    approximate:  ['flag-approx',       'Approx.'],
+    tbd:          ['flag-tbd',          'TBD'],
+    exempt:       ['flag-exempt',       'Exempt'],
+    conflicting:  ['flag-conflicting',  'Conflicting'],
+  };
+  const [cls, label] = map[status] || ['flag-incomplete', status];
+  return `<span class="flag ${cls}">${label}</span>`;
+}
+
+function updateTotal() {
+  let total = 0;
+  document.querySelectorAll('#cart-body tr').forEach(row => {
+    const cb  = row.querySelector('input[type=checkbox]');
+    const amt = row.querySelector('.amt-input');
+    if (cb && cb.checked && amt && amt.value) {
+      total += parseFloat(amt.value) || 0;
+    }
+  });
+  document.getElementById('total-display').textContent =
+    '$' + total.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+}
+
+function toggleAll(masterCb) {
+  document.querySelectorAll('#cart-body input[type=checkbox]').forEach(cb => cb.checked = masterCb.checked);
+  updateTotal();
+}
+
+function showContact(idx) {
+  const item = cartItems[idx];
+  if (!item || !item.outreach) return;
+  const o = item.outreach;
+  document.getElementById('modal-title').textContent = o.name || 'Department Contact';
+  document.getElementById('modal-body').innerHTML = `
+    <table class="kv" style="min-width:320px;margin-bottom:0">
+      ${o.phone ? `<tr><th>Phone</th><td>${escHtml(o.phone)}</td></tr>` : ''}
+      ${o.url   ? `<tr><th>Website</th><td><a href="${escHtml(o.url)}" target="_blank" rel="noopener">${escHtml(o.url)}</a></td></tr>` : ''}
+      <tr><th>Fee item</th><td>${escHtml(item.fee_name)}</td></tr>
+      <tr><th>Notes</th><td style="font-size:0.83rem;color:#555">${escHtml(item.notes)}</td></tr>
+    </table>
+    ${o.url ? `<p style="margin-top:0.8rem;margin-bottom:0">
+      <a href="mailto:?subject=${encodeURIComponent('Fee inquiry — ' + item.fee_name)}&body=${encodeURIComponent('Hello,\n\nI am requesting information about: ' + item.fee_name + '\n\nProject notes: ' + item.notes + '\n\nThank you.')}" class="btn-secondary" style="display:inline-block">
+        Draft Email Inquiry
+      </a>
+    </p>` : ''}
+  `;
+  document.getElementById('outreach-modal').style.display = 'flex';
+}
+
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('outreach-modal')) {
+    document.getElementById('outreach-modal').style.display = 'none';
+  }
+}
+
+function exportCSV() {
+  const customer = document.getElementById('customer-name').value.trim() || 'Customer';
+  const address  = document.getElementById('address').value.trim();
+  const sqft     = document.getElementById('sqft').value;
+  const jxEl     = document.getElementById('jurisdiction');
+  const jxLabel  = jxEl.options[jxEl.selectedIndex].text;
+  const ptEl     = document.getElementById('project-type');
+  const projType = ptEl.options[ptEl.selectedIndex].text;
+  const total    = document.getElementById('total-display').textContent;
+  const today    = new Date().toLocaleDateString('en-US');
+
+  let csv = `Fee Estimate\n`;
+  csv += `Customer:,${q(customer)}\n`;
+  csv += `Address:,${q(address || 'TBD')}\n`;
+  csv += `Jurisdiction:,${q(jxLabel)}\n`;
+  csv += `Project:,${q(projType + ' — ' + parseFloat(sqft).toLocaleString() + ' sq ft')}\n`;
+  csv += `Generated:,${today}\n\n`;
+  csv += `Included,Fee Item,Amount,Status,Source,Notes\n`;
+
+  document.querySelectorAll('#cart-body tr').forEach((row, i) => {
+    const item  = cartItems[i];
+    const cb    = row.querySelector('input[type=checkbox]');
+    const amt   = row.querySelector('.amt-input');
+    const notes = row.querySelector('.notes-input');
+    const included = cb && cb.checked ? 'Yes' : 'No';
+    const amount   = amt && amt.value
+      ? `$${parseFloat(amt.value).toFixed(2)}`
+      : (item.amount_text || 'TBD');
+    csv += `${included},${q(item.fee_name)},${q(amount)},${q(item.status)},${q(item.source_label)},${q(notes ? notes.value : item.notes)}\n`;
+  });
+
+  csv += `\nEstimate Total (checked items):,${q(total)}\n`;
+  csv += `\n"*** Fees gathered as a courtesy. Paid directly to each agency. Subject to change. TBD items require direct confirmation. ***"\n`;
+
+  const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `fee-estimate-${customer.replace(/\s+/g,'-').toLowerCase()}-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function q(s)       { return `"${String(s||'').replace(/"/g,'""')}"`; }
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+
+{% endblock %}
