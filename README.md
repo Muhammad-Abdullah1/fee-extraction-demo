@@ -110,6 +110,25 @@ uvicorn app.main:app --reload
 # then open http://127.0.0.1:8000
 ```
 
+## Deploy on Railway
+
+This repo includes a Railway-ready startup path:
+
+- `railway.json` tells Railway to start `./scripts/railway-start.sh`
+- `scripts/railway-start.sh` sets `FEES_DB_PATH`, creates the DB directory,
+  bootstraps the SQLite database from the bundled `fixtures/` on first deploy,
+  and then starts `uvicorn`
+
+Recommended Railway setup:
+
+1. Create a new Railway project from this GitHub repo.
+2. Add a `Volume` and mount it at `/app/data`.
+3. Set `FEES_DB_PATH=/app/data/fees.db`.
+4. Deploy.
+
+On first deploy, the app will build `fees.db` automatically. Later
+deploys reuse the persisted volume and skip re-ingestion.
+
 `run_extraction.py` reads from `fixtures/*.pdf` if present (the demo
 ships with cached copies of the public PDFs). If a fixture is missing
 it will download the file from the official URL on first run.
